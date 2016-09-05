@@ -1,8 +1,6 @@
-SCHEMA
-======
+# SCHEMA
 
-Creat Record
------------
+## Creat Record
 
 ```
 A:
@@ -18,7 +16,7 @@ Content-Type: application/json
 Response
 HTTP/1.1 200 OK
 
-[Example]
+Example]
 A:
 Request
 POST /macedon/create HTTP/1.1
@@ -39,8 +37,8 @@ Content-Type: application/json
 }
 ```
 
-Delete Record
-------------
+## Delete Record
+
 ```
 Request
 POST /macedon/delete HTTP/1.1
@@ -69,8 +67,8 @@ Response
 HTTP/1.1 200 OK
 ```
 
-Read Record
------------
+## Read Record
+
 ```
 Request
 POST /macedon/read HTTP/1.1
@@ -123,8 +121,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-Status Code 
------------
+## Status Code 
 
 * 200 - Success
 * 204 - No Content (Not found record)
