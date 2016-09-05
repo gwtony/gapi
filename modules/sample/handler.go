@@ -13,11 +13,13 @@ import (
 type Handler struct {
 	add_loc    string
 	delete_loc string
+	host       string
 	log        log.Log
 }
 
-func InitHandler(loc string, log log.Log) *Handler {
+func InitHandler(loc, host string, log log.Log) *Handler {
 	h := &Handler{}
+	h.host = host
 	h.log = log
 	h.add_loc = loc + SAMPLE_ADD_LOCATION
 	h.delete_loc = loc + SAMPLE_DELETE_LOCATION
@@ -28,17 +30,33 @@ func InitHandler(loc string, log log.Log) *Handler {
 func (h *Handler) RuleOperate(addr string, args string, op int) error {
 	var err error
 	var resp *http.Response
+	client := &http.Client{}
 
 	switch op {
 	case ADD_RULE:
-		h.log.Debug("add rule args is ", args)
-		//resp, err = http.Post("http://" + addr + h.add_loc, variable.DEFAULT_CONTENT_HEADER, args)
-		resp, err = http.Get("http://" + addr + h.add_loc + "?" + args)
+		h.log.Debug("Add rule args is ", args)
+		req, err := http.NewRequest("GET", "http://" + addr + h.add_loc + "?" + args, nil)
+		if err != nil {
+			h.log.Error("New request failed: ", err)
+			return errors.InternalServerError
+		}
+		if h.host != "" {
+			req.Host = h.host
+			h.log.Debug("Add header %s", h.host)
+		}
+		resp, err = client.Do(req)
 		break
 	case DELETE_RULE:
-		h.log.Debug("delete rule args is ", args)
-		//resp, err = http.Post("http://" + addr + h.delete_loc, variable.DEFAULT_CONTENT_HEADER, args)
-		resp, err = http.Get("http://" + addr + h.delete_loc + "?" + args)
+		h.log.Debug("Delete rule args is ", args)
+		req, err := http.NewRequest("GET", "http://" + addr + h.delete_loc + "?" + args, nil)
+		if err != nil {
+			h.log.Error("New request failed: ", err)
+			return errors.InternalServerError
+		}
+		if h.host != "" {
+			req.Host = h.host
+		}
+		resp, err = client.Do(req)
 		break
 	default: /* Should not reach here */
 		h.log.Error("Unknown operate code: ", op)
@@ -66,7 +84,6 @@ func (h *Handler) RuleAdd(addr, host string, band, expire int, header string) er
 	}
 	args := fmt.Sprint("host=", host, "&band=", band,
 			"&expire=", expire, "&header=", header)
-	h.log.Info(args)
 
 	return h.RuleOperate(addr, args, ADD_RULE)
 }
@@ -77,7 +94,6 @@ func (h *Handler) RuleDelete(addr, host string, band, expire int, header string)
 	}
 	args := fmt.Sprint("host=", host, "&band=", band,
 			"&expire=", expire, "&header=", header)
-	h.log.Info(args)
 
 	return h.RuleOperate(addr, args, DELETE_RULE)
 }

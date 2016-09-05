@@ -6,6 +6,7 @@ import (
 	"git.lianjia.com/lianjia-sysop/napi/config"
 )
 
+// InitContext inits macedon context
 func InitContext(conf *config.Config, hs *hserver.HttpServer, log log.Log) error {
 	cf := &MacedonConfig{}
 	err := cf.ParseConfig(conf)
@@ -16,17 +17,17 @@ func InitContext(conf *config.Config, hs *hserver.HttpServer, log log.Log) error
 
 	h := InitHandler(cf.eaddr, cf.loc, log)
 
-	api_loc := cf.api_loc
+	apiLoc := cf.apiLoc
 	domain := cf.domain
 
-	pc := InitPurgeContext(cf.purge_ips, cf.purge_port, cf.purge_cmd, cf.purge_to, log)
+	pc := InitPurgeContext(h, cf.purgeCmd, cf.purgeTo, log)
 
-	hs.AddRouter(api_loc + MACEDON_ADD_LOC, &AddHandler{h: h, domain: domain, log: log})
-	hs.AddRouter(api_loc + MACEDON_DELETE_LOC, &DeleteHandler{h: h, domain: domain, pc: pc, log: log})
-	hs.AddRouter(api_loc + MACEDON_READ_LOC, &ReadHandler{domain: domain, log: log})
-	//hs.AddRouter(api_loc + MACEDON_ADD_SERVER_LOC, &AddServerHandler{log: log})
-	//hs.AddRouter(api_loc + MACEDON_DELETE_SERVER_LOC, &DeleteServerHandler{log: log})
-	//hs.AddRouter(api_loc + MACEDON_READ_SERVER_LOC, &ReadServerHandler{log: log})
+	hs.AddRouter(apiLoc + MACEDON_ADD_LOC, &AddHandler{h: h, domain: domain, log: log})
+	hs.AddRouter(apiLoc + MACEDON_DELETE_LOC, &DeleteHandler{h: h, domain: domain, pc: pc, log: log})
+	hs.AddRouter(apiLoc + MACEDON_READ_LOC, &ReadHandler{h: h, domain: domain, log: log})
+	hs.AddRouter(apiLoc + MACEDON_ADD_SERVER_LOC, &AddServerHandler{h: h, pc: pc, log: log})
+	hs.AddRouter(apiLoc + MACEDON_DELETE_SERVER_LOC, &DeleteServerHandler{h: h, pc: pc, log: log})
+	hs.AddRouter(apiLoc + MACEDON_READ_SERVER_LOC, &ReadServerHandler{h: h, log: log})
 
 	return nil
 }

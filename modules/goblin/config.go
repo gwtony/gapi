@@ -15,6 +15,8 @@ type GoblinConfig struct {
 
 	api_loc string /* goblin api location */
 	loc     string /* goblin location */
+	token   string /* clear expire token */
+	host    string /* nginx hostname */
 }
 
 
@@ -56,5 +58,16 @@ func (conf *GoblinConfig) ParseConfig(cf *config.Config) error {
 		conf.api_loc = GOBLIN_API_LOCATION
 	}
 
+	conf.token, err = cf.C.GetString("goblin", "token")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[Info] [Goblin] Read conf: No token, use default token", GOBLIN_TOKEN)
+		conf.token = GOBLIN_TOKEN
+	}
+
+	conf.host, err = cf.C.GetString("goblin", "host")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[Info] [Gobliin] Read conf: No host")
+		conf.host = ""
+	}
 	return nil
 }

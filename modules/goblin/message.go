@@ -2,9 +2,7 @@ package goblin
 
 type GoblinRequest struct {
 	Ip          string
-	Uid         string
 	Uuid        string
-	Type        string
 	Product     string
 	Expire      int
 	Action      string
@@ -16,7 +14,6 @@ type GoblinReadResponse []GoblinRequest
 type GoblinMessage struct {
 	Startip     string
 	Endip       string
-	Uid         string
 	Uuid        string
 	Expire      string
 	Punish      string
@@ -29,3 +26,7 @@ type ServerRequest struct {
 }
 type ServerResponse ServerRequest
 
+type ClearRequest struct {
+	Expire int
+	Token  string
+}

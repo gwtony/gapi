@@ -1,39 +1,48 @@
 package macedon
 
-/* Http message struct */
+// MacedonRequest is Macedon request
 type MacedonRequest struct {
     Name    string
-    Addr    string
-	Ttl     int
+    Address string
+    Ttl     int
 }
 
-type MacedonAddress struct {
-	Addr string
-	Ttl  int
-}
-
+// MacedonResponse is Macedon response
 type MacedonResponse struct {
-	Name string
-	Addrs []MacedonAddress
+    Result []MacedonRequest
 }
 
 
-/* Etcd request */
+// RecValue is Etcd request
 type RecValue struct {
     Host string
     Ttl  int
 }
 
+// SubNode is Etcd sub node
 type SubNode struct {
-    Key string
+    Key   string
     Value string
 }
 
+// Node is Etcd node
 type Node struct {
-    Key string
+    Key   string
+    Value string
     Nodes []SubNode
 }
 
+// EtcdResponse is Etcd response
 type EtcdResponse struct {
     Node Node
+}
+
+// ServerRequest is Server request
+type ServerRequest struct {
+	Address string
+}
+
+// ServerResponse is Server response
+type ServerResponse struct {
+	Result []ServerRequest
 }

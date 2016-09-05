@@ -83,7 +83,7 @@ func ReturnResponse(w http.ResponseWriter, resp interface{}, log log.Log) {
 		return
 	}
 
-	w.Header().Set("Content-Type", variable.DEFAULT_CONTENT_HEADER)
+	w.Header().Set("Content-Type", variable.JSON_CONTENT_HEADER)
 	w.WriteHeader(http.StatusOK)
 
 	log.Debug("Return OK")

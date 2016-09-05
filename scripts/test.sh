@@ -5,7 +5,7 @@ if [ "$1" == "cover" ]; then
 	gocmd="$GOROOT/bin/go test -cover"
 fi
 
-for dir in `ls ./ | grep -v "test\|script\|sql\|Makefile\|error\|example\|variable\|utils\|run\|message\|README"`; do
+for dir in `ls ./ | grep -v "test\|script\|sql\|Makefile\|error\|example\|variable\|utils\|run\|message\|README\|dist"`; do
 	(cd $dir && $gocmd)
 done
 

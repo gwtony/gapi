@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"encoding/json"
 	"git.lianjia.com/lianjia-sysop/napi/log"
+	"git.lianjia.com/lianjia-sysop/napi/errors"
 	"git.lianjia.com/lianjia-sysop/napi/utils"
 	"git.lianjia.com/lianjia-sysop/napi/hserver"
-	"git.lianjia.com/lianjia-sysop/napi/errors"
 )
 
 type AddHandler struct {
@@ -223,7 +223,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 		hserver.ReturnError(w, err, handler.log)
 		return
 	}
-	handler.log.Debug("Get server result is: ", servers)
+	handler.log.Debug("Get server result is: %s", servers)
 
 	errFlag := 0
 	for _, h := range resp.Match.Host {

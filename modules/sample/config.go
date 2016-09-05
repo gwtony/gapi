@@ -14,6 +14,7 @@ type SampleConfig struct {
 	dbpwd   string /* db password */
 	token   string /* clear expire token */
 
+	host    string /* sample ngx server name */
 	api_loc string /* sample api location */
 	loc     string /* sample location */
 }
@@ -61,6 +62,12 @@ func (conf *SampleConfig) ParseConfig(cf *config.Config) error {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[Info] [Sample] Read conf: No token, use default token", SAMPLE_TOKEN)
 		conf.token = SAMPLE_TOKEN
+	}
+
+	conf.host, err = cf.C.GetString("sample", "host")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[Info] [Sample] Read conf: No nginx host")
+		conf.host = ""
 	}
 
 	return nil

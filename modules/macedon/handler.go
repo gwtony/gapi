@@ -2,8 +2,6 @@ package macedon
 
 import (
 	//"fmt"
-	//"bytes"
-	//"time"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -14,25 +12,29 @@ import (
 	"git.lianjia.com/lianjia-sysop/napi/errors"
 )
 
+// Handler Etcd handler
 type Handler struct {
 	eaddr      []string
-	eaddr_size int
+	eaddrSize  int
 	loc        string
 	log        log.Log
 }
 
+// InitHandler inits handler
 func InitHandler(eaddr []string, loc string, log log.Log) *Handler {
 	h := &Handler{}
 	h.eaddr = eaddr
-	h.eaddr_size = len(eaddr)
+	h.eaddrSize = len(eaddr)
 	h.log = log
 	h.loc = loc
 
 	return h
 }
 
-func (h *Handler) Operate(loc string, args string, op int) (*EtcdResponse, error) {
+// Operate operates etcd
+func (h *Handler) Operate(loc string, args string, op int, arpa bool, server bool) (*EtcdResponse, error) {
 	var err error
+	var floc string
 	var resp *http.Response
 
 	retry := 0
@@ -44,24 +46,47 @@ next:
 		val := &url.Values{}
 		val.Add("value", args)
 		data := bytes.NewBufferString(val.Encode())
-		h.log.Debug("add url is %s", "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc)
-		req, _ := http.NewRequest("PUT", "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc , data)
+		if arpa {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_ARPA_LOC + loc
+		} else {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc
+		}
+		if server {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_PURGE_SERVER_LOC + loc
+		}
+		h.log.Debug("add url is %s", floc)
+		req, _ := http.NewRequest("PUT", floc , data)
 		req.Header.Set(CONTENT_HEADER, ETCD_CONTENT_HEADER)
 		client := &http.Client{}
 		resp, err = client.Do(req)
 		break
 	case DELETE:
-		h.log.Debug("delete record args is %s", loc)
-		h.log.Debug("del url is %s", "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc)
-		req, _ := http.NewRequest("DELETE", "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc, nil)
+		if arpa {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_ARPA_LOC + loc
+		} else {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc
+		}
+		if server {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_PURGE_SERVER_LOC + loc
+		}
+		h.log.Debug("del url is %s", floc)
+		req, _ := http.NewRequest("DELETE", floc, nil)
 		req.Header.Set(CONTENT_HEADER, ETCD_CONTENT_HEADER)
 		client := &http.Client{}
 		resp, err = client.Do(req)
 		break
 	case READ:
-		h.log.Debug("Read record loc is %s", loc)
-		h.log.Debug("read url is %s", "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc)
-		resp, err = http.Get("http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc)
+		if arpa {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_ARPA_LOC + loc
+		} else {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_SKYDNS_LOC + loc
+		}
+		if server {
+			floc = "http://" + h.eaddr[retry] + DEFAULT_PURGE_SERVER_LOC
+		}
+		h.log.Debug("read url is %s", floc)
+		resp, err = http.Get(floc)
+		break
 	default: /* Should not reach here */
 		h.log.Error("Unknown operate code: ", op)
 		return nil, errors.InternalServerError
@@ -70,11 +95,13 @@ next:
 	if err != nil {
 		h.log.Error("Opereate service to etcd failed: ", err)
 		retry++
-		if retry >= h.eaddr_size {
+		if retry >= h.eaddrSize {
 			return nil, errors.BadGatewayError
 		}
 		goto next
 	}
+
+	defer resp.Body.Close()
 
 	if resp.StatusCode != variable.HTTP_OK && resp.StatusCode != variable.HTTP_CREATED {
 		h.log.Error("Opereate http status error: %d", resp.StatusCode)
@@ -94,7 +121,7 @@ next:
 		h.log.Error("Read operate result body failed: ", err)
 		return nil, errors.InternalServerError
 	}
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 
 	eresp := &EtcdResponse{}
 	err = json.Unmarshal(body, &eresp)
@@ -106,7 +133,8 @@ next:
 	return eresp, nil
 }
 
-func (h *Handler) Add(rec, addr string, ttl int) (*EtcdResponse, error) {
+// Add adds record to etcd
+func (h *Handler) Add(rec, addr string, ttl int, arpa bool, server bool) (*EtcdResponse, error) {
 	r := &RecValue{}
 	r.Host = addr
 	r.Ttl = ttl
@@ -119,13 +147,15 @@ func (h *Handler) Add(rec, addr string, ttl int) (*EtcdResponse, error) {
 
 	h.log.Info(args)
 
-	return h.Operate(rec, args, ADD)
+	return h.Operate(rec, args, ADD, arpa, server)
 }
 
-func (h *Handler) Delete(rec string) (*EtcdResponse, error) {
-	return h.Operate(rec, "", DELETE)
+// Delete deletes record to etcd
+func (h *Handler) Delete(rec string, arpa bool, server bool) (*EtcdResponse, error) {
+	return h.Operate(rec, "", DELETE, arpa, server)
 }
 
-func (h *Handler) Read(rec string) (*EtcdResponse, error) {
-	return h.Operate(rec, "", READ)
+// Read reads record from etcd
+func (h *Handler) Read(rec string, arpa bool, server bool) (*EtcdResponse, error) {
+	return h.Operate(rec, "", READ, arpa, server)
 }

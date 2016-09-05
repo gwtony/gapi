@@ -20,7 +20,7 @@ func InitRouter(log log.Log) *Router {
 
 func (r *Router) AddRouter(url string, handler http.Handler) error {
 	if _, ok := r.handlers[url]; ok {
-		r.log.Error("url: %s has been added", url)
+		r.log.Error("Url: %s has been added", url)
 		//TODO: add some error
 		return nil
 	}

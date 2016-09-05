@@ -26,15 +26,18 @@ type ServersResult []string
 const (
 	GOBLIN_GET_SERVER_SQL     = "select addr from servers where product = ? and state = 1"
 
-	GOBLIN_READ_SQL           = "select ip, uid, uuid, product, expire, action, rule_id from rules where ip = ? and uid = ? and uuid = ? and product = ? and expire > ?"
-	GOBLIN_ADD_SQL            = "insert into rules (ip, uid, uuid, product, expire, action, rule_id) values (?, ?, ?, ?, ?, ?, ?)"
-	GOBLIN_DELETE_SQL         = "delete from rules where ip = ? and uid = ? and uuid = ?"
+	GOBLIN_READ_SQL           = "select ip, uuid, product, expire, action, rule_id from rules where ip = ? and uuid = ? and product = ? and expire > ? and deleted = 0"
+	GOBLIN_ADD_SQL            = "insert into rules (ip, uuid, product, expire, action, rule_id) values (?, ?, ?, ?, ?, ?)"
+
 	GOBLIN_UPDATE_DELETED_SQL = "update rules set deleted = 1 where rule_id = ?"
 	GOBLIN_UPDATE_RESULT_SQL  = "update rules set result = 1 where rule_id = ?"
+
+	GOBLIN_CLEAR_RULE_SQL     = "delete from rules where deleted = 1 or expire < ?"
 
 	GOBLIN_ADD_SERVER_SQL     = "insert into servers (addr, product, state) values (?, ?, 1)"
 	GOBLIN_DELETE_SERVER_SQL  = "delete from servers where addr = ? and product = ?"
 	GOBLIN_READ_SERVER_SQL    = "select addr, product from servers where addr = ?"
+	GOBLIN_READ_PRODUCT_SQL   = "select addr, product from servers where product = ?"
 )
 
 func InitMysqlContext(addr, dbname, dbuser, dbpwd string, log log.Log) *MysqlContext {
@@ -53,7 +56,7 @@ func InitMysqlContext(addr, dbname, dbuser, dbpwd string, log log.Log) *MysqlCon
 func (mc *MysqlContext) Open() (*sql.DB, error) {
 	db, err := sql.Open("mysql", mc.login)
 	if err != nil {
-		mc.log.Error("open failed: %s", err)
+		mc.log.Error("Open failed: %s", err)
 		return nil, err
 	}
 
@@ -109,23 +112,23 @@ func (mc *MysqlContext) QueryGetServer(db *sql.DB, product string) (*ServersResu
 	return sr, nil
 }
 
-func (mc *MysqlContext) QueryInsert(db *sql.DB, ip, uid, uuid, product string,
+func (mc *MysqlContext) QueryInsert(db *sql.DB, ip, uuid, product string,
 		expire int, action, ruleid string) error {
-	return mc.QueryWrite(db, GOBLIN_ADD_SQL, ip, uid, uuid, product, expire, action, ruleid)
+	return mc.QueryWrite(db, GOBLIN_ADD_SQL, ip, uuid, product, expire, action, ruleid)
 }
 
-func (mc *MysqlContext) QueryRead(db *sql.DB, ip, uid, uuid, product string) (*GoblinMysqlResponse, error) {
+func (mc *MysqlContext) QueryRead(db *sql.DB, ip, uuid, product string) (*GoblinMysqlResponse, error) {
 	var expire int
 	var action, ruleid string
 
 	now := int(time.Now().Unix())
-	rows, err := db.Query(GOBLIN_READ_SQL, ip, uid, uuid, product, now)
+	rows, err := db.Query(GOBLIN_READ_SQL, ip, uuid, product, now)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			mc.log.Error("Scan no answer")
 			return nil, errors.NoContentError
 		}
-		mc.log.Error("Execute read (ip: %s, uid: %s, uuid: %s, product: %s) failed: %s", ip, uid, uuid, product, err)
+		mc.log.Error("Execute read (ip: %s, uuid: %s, product: %s) failed: %s", ip, uuid, product, err)
 		return nil, errors.BadGatewayError
 	}
 
@@ -134,7 +137,7 @@ func (mc *MysqlContext) QueryRead(db *sql.DB, ip, uid, uuid, product string) (*G
 	gr := &GoblinMysqlResponse{}
 	flag := 0
 	for rows.Next() {
-		err := rows.Scan(&ip, &uid, &uuid, &product, &expire, &action, &ruleid)
+		err := rows.Scan(&ip, &uuid, &product, &expire, &action, &ruleid)
 		if err == sql.ErrNoRows {
 			mc.log.Error("Scan no answer")
 			return nil, errors.NoContentError
@@ -149,7 +152,6 @@ func (mc *MysqlContext) QueryRead(db *sql.DB, ip, uid, uuid, product string) (*G
 		}
 
 		gr.Ip = ip
-		gr.Uid = uid
 		gr.Uuid = uuid
 		gr.Ruleid = ruleid
 		gr.Product = product
@@ -246,11 +248,42 @@ func (mc *MysqlContext) QueryWrite(db *sql.DB, query string, args ...interface{}
 	return nil
 }
 
-func (mc *MysqlContext) QueryReadServer(db *sql.DB, addr string) ([]ServerResponse, error) {
-	var product string
-	flag := 0
+func (mc *MysqlContext) QueryClearRule(db *sql.DB, expire int) error {
+	res, err := db.Exec(GOBLIN_CLEAR_RULE_SQL, expire)
 
-	rows, err := db.Query(GOBLIN_READ_SERVER_SQL, addr)
+	if err != nil {
+		mc.log.Error("Execute clear sql %s before %d failed: %s", GOBLIN_CLEAR_RULE_SQL, expire, err)
+		return errors.BadGatewayError
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		mc.log.Error("Get rows affected failed: %s", err)
+		return errors.InternalServerError
+	}
+
+	if int(affected) > 0 {
+		return nil
+	}
+
+	mc.log.Info("No rules to clear")
+	return errors.NoContentError
+}
+
+func (mc *MysqlContext) QueryReadServer(db *sql.DB, addr, product string) ([]ServerResponse, error) {
+	flag := 0
+	var query, arg string
+
+	if len(addr) > 0 {
+		query = GOBLIN_READ_SERVER_SQL
+		arg = addr
+	} else if len(product) > 0 {
+		query = GOBLIN_READ_PRODUCT_SQL
+		arg = product
+	}
+
+	rows, err := db.Query(query, arg)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			mc.log.Error("Scan no answer")

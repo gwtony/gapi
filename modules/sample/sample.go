@@ -14,7 +14,7 @@ func InitContext(conf *config.Config, hs *hserver.HttpServer, log log.Log) error
 		return err
 	}
 
-	h := InitHandler(cf.loc, log)
+	h := InitHandler(cf.loc, cf.host, log)
 	mc := InitMysqlContext(cf.maddr, cf.dbname, cf.dbuser, cf.dbpwd, log)
 
 	api_loc := cf.api_loc

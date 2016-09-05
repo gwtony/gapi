@@ -28,9 +28,9 @@ const (
 	SAMPLE_CLEAR_EXPIRE_SQL   = "delete from rules where expire < ?"
 	SAMPLE_GET_SERVER_SQL     = "select addr from servers where product = ? and state = 1"
 
-	SAMPLE_READ_HOST_SQL      = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where host = ? and expire > ? and deleted = 0"
-	SAMPLE_READ_HOST_LIKE_SQL = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where host like ? and expire > ? and deleted = 0"
-	SAMPLE_READ_RULEID_SQL    = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where rule_id = ? and expire > ?"
+	SAMPLE_READ_HOST_SQL      = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where host = ? and expire > ? and deleted = 0 and result = 1"
+	SAMPLE_READ_HOST_LIKE_SQL = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where host like ? and expire > ? and deleted = 0 and result = 1"
+	SAMPLE_READ_RULEID_SQL    = "select type, host, band, action_type, action_value, rule_id, product, expire from rules where rule_id = ? and expire > ? and result = 1"
 	SAMPLE_ADD_SQL            = "insert into rules (type, host, band, action_type, action_value, rule_id, product, expire) values (?, ?, ?, ?, ?, ?, ?, ?)"
 	SAMPLE_UPDATE_DELETED_SQL = "update rules set deleted = 1 where rule_id = ?"
 	SAMPLE_UPDATE_RESULT_SQL  = "update rules set result = 1 where rule_id = ?"
@@ -244,6 +244,7 @@ func (mc *MysqlContext) QueryReadByHost(db *sql.DB, host, htype string) (*Sample
 		resp.Action.Type = action_type
 		resp.Action.Value = action_value
 		resp.Product = product
+		resp.Ruleid = rule_id
 		resps = append(resps, *resp)
 	}
 

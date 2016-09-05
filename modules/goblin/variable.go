@@ -8,6 +8,7 @@ const (
 	GOBLIN_RULE_ADD_LOCATION       = "/rule/add"
 	GOBLIN_RULE_DELETE_LOCATION    = "/rule/delete"
 	GOBLIN_RULE_READ_LOCATION      = "/rule/read"
+	GOBLIN_RULE_CLEAR_LOCATION     = "/rule/clear"
 
 	GOBLIN_SERVER_ADD_LOCATION     = "/server/add"
 	GOBLIN_SERVER_DELETE_LOCATION  = "/server/delete"
@@ -21,5 +22,6 @@ const (
 
 	EMPTY_IP                       = "0.0.0.0"
 	EMPTY_UUID                     = "0"
-	EMPTY_UID                      = "0"
+
+	GOBLIN_TOKEN                   = "goblin.token"
 )

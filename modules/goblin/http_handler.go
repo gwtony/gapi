@@ -38,6 +38,11 @@ type DeleteServerHandler struct {
 	mc  *MysqlContext
 	log log.Log
 }
+type ClearHandler struct {
+	token string
+	mc    *MysqlContext
+	log   log.Log
+}
 
 func (handler *AddHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
@@ -64,33 +69,30 @@ func (handler *AddHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	handler.log.Info("Create record request: ", data)
 
 	/* Check input */
-	if data.Ip == "" && data.Uid == "" && data.Uuid == "" {
-		handler.log.Error("Post arguments invalid")
+	if data.Ip == "" && data.Uuid == "" {
+		handler.log.Error("Ip or uuid invalid")
 		http.Error(w, "Name invalid", http.StatusBadRequest)
 		return
 	}
 	if data.Product == "" || data.Action == "" {
-		handler.log.Error("Post arguments invalid")
+		handler.log.Error("Product or Action is invalid")
 		http.Error(w, "Name invalid", http.StatusBadRequest)
 		return
 	}
 	if data.Expire <= 0 {
-		handler.log.Error("Post arguments invalid")
+		handler.log.Error("Expire invalid")
 		http.Error(w, "Name invalid", http.StatusBadRequest)
 		return
 	}
 
 	if data.Ip == "" {
-		data.Ip = "0.0.0.0"
-	}
-	if data.Uid == "" {
-	   data.Uid = "0"
+		data.Ip = EMPTY_IP
 	}
 	if data.Uuid == "" {
-		data.Uuid = "0"
+		data.Uuid = EMPTY_UUID
 	}
 	/* only support forbidden */
-	data.Action = "forbidden"
+	//data.Action = "forbi"
 
 	db, err := handler.mc.Open()
 	if err != nil {
@@ -113,7 +115,7 @@ func (handler *AddHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data.Expire = int(time.Now().Unix() + int64(data.Expire))
-	err = handler.mc.QueryInsert(db, data.Ip, data.Uid, data.Uuid, data.Product, data.Expire, data.Action, data.Ruleid)
+	err = handler.mc.QueryInsert(db, data.Ip, data.Uuid, data.Product, data.Expire, data.Action, data.Ruleid)
 	if err != nil {
 		hserver.ReturnError(w, err, handler.log)
 		return
@@ -121,7 +123,7 @@ func (handler *AddHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	errFlag := 0
 	for _, server := range *servers {
-		err = handler.h.RuleAdd(server, data.Ip, data.Uid, data.Uuid, data.Expire, data.Action)
+		err = handler.h.RuleAdd(server, data.Ip, data.Uuid, data.Expire, data.Action)
 		if err != nil {
 			handler.log.Error("Rule add to %s failed, data is %s", server, data)
 			errFlag = 1
@@ -167,9 +169,9 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	handler.log.Info("Delete record request: ", data)
 
 	/* Check input */
-	if data.Ip == "" && data.Uid == "" && data.Uuid == "" {
+	if data.Ip == "" && data.Uuid == "" {
 		handler.log.Error("Post arguments invalid")
-		http.Error(w, "Ip, Uid, Uuid invalid", http.StatusBadRequest)
+		http.Error(w, "Ip, Uuid invalid", http.StatusBadRequest)
 		return
 	}
 	if data.Product == "" {
@@ -179,13 +181,10 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	}
 
 	if data.Ip == "" {
-		data.Ip = "0.0.0.0"
-	}
-	if data.Uid == "" {
-	   data.Uid = "0"
+		data.Ip = EMPTY_IP
 	}
 	if data.Uuid == "" {
-		data.Uuid = "0"
+		data.Uuid = EMPTY_UUID
 	}
 
 	db, err := handler.mc.Open()
@@ -204,7 +203,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 	}
 	handler.log.Debug("Get server result is: ", servers)
 
-	resp, err := handler.mc.QueryRead(db, data.Ip, data.Uid, data.Uuid, data.Product)
+	resp, err := handler.mc.QueryRead(db, data.Ip, data.Uuid, data.Product)
 	if err != nil {
 		handler.log.Error("Read rule failed: ", err)
 		hserver.ReturnError(w, err, handler.log)
@@ -215,7 +214,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, req *http.Request
 
 	errFlag := 0
 	for _, server := range *servers {
-		err = handler.h.RuleDelete(server, data.Ip, data.Uid, data.Uuid, action)
+		err = handler.h.RuleDelete(server, data.Ip, data.Uuid, action)
 		if err != nil {
 			handler.log.Error("Rule delete to %s failed, data is %s", server, data)
 			errFlag = 1
@@ -263,9 +262,9 @@ func (handler *ReadHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	handler.log.Info("Read record request from %s ", req.RemoteAddr, data)
 
 	/* Check input */
-	if data.Ip == "" && data.Uid == "" && data.Uuid == "" {
+	if data.Ip == "" && data.Uuid == "" {
 		handler.log.Error("Post arguments invalid")
-		http.Error(w, "Ip, Uid, Uuid invalid", http.StatusBadRequest)
+		http.Error(w, "Ip, Uuid invalid", http.StatusBadRequest)
 		return
 	}
 	if data.Product == "" {
@@ -275,13 +274,10 @@ func (handler *ReadHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 
 	if data.Ip == "" {
-		data.Ip = "0.0.0.0"
-	}
-	if data.Uid == "" {
-	   data.Uid = "0"
+		data.Ip = EMPTY_IP
 	}
 	if data.Uuid == "" {
-		data.Uuid = "0"
+		data.Uuid = EMPTY_UUID
 	}
 	//TODO: Deal wildcard */
 	//name := data.Name
@@ -297,7 +293,7 @@ func (handler *ReadHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 	defer handler.mc.Close(db)
 
-	cresps, err := handler.mc.QueryRead(db, data.Ip, data.Uid, data.Uuid, data.Product)
+	cresps, err := handler.mc.QueryRead(db, data.Ip, data.Uuid, data.Product)
 	if err != nil {
 		hserver.ReturnError(w, err, handler.log)
 		return
@@ -307,7 +303,6 @@ func (handler *ReadHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	//for _, cresp := range *cresps {
 	//	resp := GoblinRequest{}
 	//	resp.Ip      = cresp.Ip
-	//	resp.Uid     = cresp.Uid
 	//	resp.Uuid    = cresp.Uuid
 	//	resp.Product = cresp.Product
 	//	resp.Expire  = cresp.Expire
@@ -341,7 +336,7 @@ func (handler *ReadServerHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		return
 	}
 	handler.log.Info("Read record request from %s, data is %s", req.RemoteAddr, data)
-	if data.Addr == "" {
+	if data.Addr == "" && data.Product == "" {
 		handler.log.Error("Post arguments invalid")
 		http.Error(w, "Addr invalid", http.StatusBadRequest)
 		return
@@ -355,7 +350,7 @@ func (handler *ReadServerHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 	}
 	defer handler.mc.Close(db)
 
-	resps, err := handler.mc.QueryReadServer(db, data.Addr)
+	resps, err := handler.mc.QueryReadServer(db, data.Addr, data.Product)
 	if err != nil {
 		handler.log.Error("Query read server failed: %s", err)
 		hserver.ReturnError(w, err, handler.log)
@@ -452,6 +447,59 @@ func (handler *DeleteServerHandler) ServeHTTP(w http.ResponseWriter, req *http.R
 	err = handler.mc.QueryDeleteServer(db, data.Addr, data.Product)
 	if err != nil {
 		handler.log.Error("Query delete server failed: %s", err)
+		hserver.ReturnError(w, err, handler.log)
+		return
+	}
+
+	hserver.ReturnResponse(w, nil, handler.log)
+}
+
+
+func (handler *ClearHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		handler.log.Error("Method invalid: %s", req.Method)
+		http.Error(w, "Method invalid", http.StatusBadRequest)
+		return
+	}
+
+	result, err:= ioutil.ReadAll(req.Body)
+	if err != nil {
+		handler.log.Error("Read from request body failed: %s", err)
+		http.Error(w, "Read from body failed", http.StatusBadRequest)
+		return
+	}
+	req.Body.Close()
+
+	data := &ClearRequest{}
+	err = json.Unmarshal(result, &data)
+	if err != nil {
+		handler.log.Error("Parse from request body failed: %s", err)
+		http.Error(w, "Parse from body failed", http.StatusBadRequest)
+		return
+	}
+
+	if data.Token != handler.token {
+		handler.log.Error("Token check failed")
+		http.Error(w, "Token check failed", http.StatusForbidden)
+		return
+	}
+	if data.Expire >= int(time.Now().Unix()) {
+		handler.log.Error("Expire is too large")
+		http.Error(w, "Expire should be a past timestamp", http.StatusBadRequest)
+		return
+	}
+
+	db, err := handler.mc.Open()
+	if err != nil {
+		handler.log.Error("Mysql open failed: %s", err)
+		http.Error(w, "Mysql open failed", http.StatusBadGateway)
+		return
+	}
+	defer handler.mc.Close(db)
+
+	err = handler.mc.QueryClearRule(db, data.Expire)
+	if err != nil {
+		handler.log.Error("Query clear expires failed: %s", err)
 		hserver.ReturnError(w, err, handler.log)
 		return
 	}
