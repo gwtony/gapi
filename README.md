@@ -1,6 +1,6 @@
 # napi
 ## Description
-Http api for nginx module
+Http api for something...
 * sample
 * goblin
 * macedon
