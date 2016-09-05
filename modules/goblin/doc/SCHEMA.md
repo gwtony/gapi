@@ -1,6 +1,6 @@
 # Goblin
 ## Description
-Napi.goblin is used to forbidden requests from ip blacklist，and pass from uuid whitelist，all rules can be set dynamicly
+Napi.goblin is used to forbidden requests from ip blacklist，and accept with uuid whitelist，all rules can be set dynamicly
 
 ### Ip
 Ip: gets from the first part of x-forwarded-for header，if it not exists, gets from socket
