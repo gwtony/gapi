@@ -53,6 +53,7 @@ host: hostname         #nginx hostname
 
 * [goblin schema infomation](modules/goblin/doc/SCHEMA.md)
 * [macedon schema infomation](modules/macedon/doc/SCHEMA.md)
+* [sample schema infomation](modules/sample/doc/SCHEMA.md)
 
 ## Dependency
 
