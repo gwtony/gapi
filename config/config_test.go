@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"testing"
-	"git.lianjia.com/lianjia-sysop/napi/test"
+	"github.com/gwtony/gapi/test"
 )
 
 
@@ -18,7 +18,7 @@ func testReadConf(t *testing.T, data string) *Config {
 	defer os.RemoveAll(tempDir)
 
 	path := filepath.Join(tempDir, "test_conf")
-	err = ioutil.WriteFile(path, []byte(test.Test_napi_conf), 0644)
+	err = ioutil.WriteFile(path, []byte(test.TestNapiConf), 0644)
 	if err != nil {
 		t.Fatalf("writeFile: %v", err)
 	}
@@ -32,10 +32,10 @@ func testReadConf(t *testing.T, data string) *Config {
 }
 
 func TestReadConfOk(t *testing.T) {
-	testReadConf(t, test.Test_napi_conf)
+	testReadConf(t, test.TestNapiConf)
 }
 
 func TestParseConfOk(t *testing.T) {
-	c := testReadConf(t, test.Test_napi_conf)
+	c := testReadConf(t, test.TestNapiConf)
 	c.ParseConf()
 }

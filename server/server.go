@@ -1,12 +1,12 @@
 package server
 
 import (
-	"git.lianjia.com/lianjia-sysop/napi/hserver"
-	"git.lianjia.com/lianjia-sysop/napi/config"
-	"git.lianjia.com/lianjia-sysop/napi/log"
-	"git.lianjia.com/lianjia-sysop/napi/modules"
+	"github.com/gwtony/gapi/hserver"
+	"github.com/gwtony/gapi/config"
+	"github.com/gwtony/gapi/log"
 )
 
+// Server is A HTTP server
 type Server struct {
 	addr    string
 
@@ -14,6 +14,7 @@ type Server struct {
 	log     log.Log
 }
 
+// InitServer inits server
 func InitServer(conf *config.Config, log log.Log) (*Server, error) {
 	s := &Server{}
 
@@ -29,11 +30,12 @@ func InitServer(conf *config.Config, log log.Log) (*Server, error) {
 
 	s.log.Debug("Init http server done")
 
-	modules.InitModules(conf, hs, log)
+	//modules.InitModules(conf, hs, log)
 
 	return s, nil
 }
 
+// Run starts server
 func (s *Server) Run() error {
 	err := s.hs.Run()
 	if err != nil {
@@ -44,3 +46,6 @@ func (s *Server) Run() error {
 	return nil
 }
 
+func (s *Server) GetHserver() (*hserver.HttpServer) {
+	return s.hs
+}

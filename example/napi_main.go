@@ -1,6 +1,6 @@
 package main
 
-import "git.lianjia.com/lianjia-sysop/napi/run"
+import "github.com/gwtony/gapi/run"
 
 func main() {
 	run.Run()

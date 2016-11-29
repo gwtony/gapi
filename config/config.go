@@ -6,10 +6,11 @@ import (
 	//"time"
 	"path/filepath"
 	goconf "github.com/msbranco/goconfig"
-	"git.lianjia.com/lianjia-sysop/napi/errors"
-	"git.lianjia.com/lianjia-sysop/napi/variable"
+	"github.com/gwtony/gapi/errors"
+	"github.com/gwtony/gapi/variable"
 )
 
+// Config of server
 type Config struct {
 	Addr       string  /* server bind address */
 
@@ -21,6 +22,7 @@ type Config struct {
 	C          *goconf.ConfigFile /* goconfig struct */
 }
 
+// ReadConf reads conf from file
 func (conf *Config) ReadConf(file string) error {
 	if file == "" {
 		file = filepath.Join(variable.DEFAULT_CONFIG_PATH, variable.DEFAULT_CONFIG_FILE)
@@ -35,6 +37,7 @@ func (conf *Config) ReadConf(file string) error {
 	return nil
 }
 
+// ParseConf parses config
 func (conf *Config) ParseConf() error {
 	var err error
 

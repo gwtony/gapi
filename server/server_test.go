@@ -2,8 +2,8 @@ package server
 
 import (
 	"testing"
-	"git.lianjia.com/lianjia-sysop/napi/config"
-	"git.lianjia.com/lianjia-sysop/napi/test"
+	"github.com/gwtony/gapi/config"
+	"github.com/gwtony/gapi/test"
 
 )
 

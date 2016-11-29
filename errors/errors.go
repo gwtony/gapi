@@ -1,13 +1,46 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+	"encoding/json"
+)
 
 var (
-	BadConfigError       = errors.New("Bad Config")
+	// Server internal errors
+	// ParseOptionError server parse option error
+	ParseOptionError  = errors.New("Parse Option Error")
+	// ReadConfigError server read config error
+	ReadConfigError      = errors.New("Read Config Error")
+	// ParseConfigError server parse config error
+	ParseConfigError     = errors.New("Parse Config Error")
+	// InitLogError server init log error
+	InitLogError         = errors.New("Init Log Error")
 
-	ForbiddenError       = errors.New("Forbidden")
+	// Http server errors
+	// BadConfigError http bad config error
+	BadConfigError       = errors.New("Bad Config")
+	// NoContentError http No Content error
 	NoContentError       = errors.New("No Content")
+	// BadRequestError http bad request error
 	BadRequestError      = errors.New("Bad Request")
-	InternalServerError  = errors.New("Interanal Server Error")
+	// ForbiddenError http forbidden error
+	ForbiddenError       = errors.New("Forbidden")
+	// ConflictError http conflict error
+	ConflictError        = errors.New("Conflict")
+	// InternalServerError http internal server error
+	InternalServerError  = errors.New("Internal Server Error")
+	// BadGatewayError http bad gateway error
 	BadGatewayError      = errors.New("Bad Gateway")
 )
+
+type jerr struct {
+	Error string
+}
+
+func Jerror(msg string) string {
+	var je jerr
+	je.Error = msg
+	res, _ := json.Marshal(je)
+	return string(res)
+}
+

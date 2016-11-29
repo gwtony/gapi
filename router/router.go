@@ -2,14 +2,16 @@ package router
 
 import (
 	"net/http"
-	"git.lianjia.com/lianjia-sysop/napi/log"
+	"github.com/gwtony/gapi/log"
 )
 
+// Router is HTTP router
 type Router struct {
 	handlers map[string]http.Handler
 	log log.Log
 }
 
+// InitRouter inits router
 func InitRouter(log log.Log) *Router {
 	r := &Router{}
 	r.handlers = make(map[string]http.Handler)
@@ -18,6 +20,7 @@ func InitRouter(log log.Log) *Router {
 	return r
 }
 
+// AddRouter adds a url router
 func (r *Router) AddRouter(url string, handler http.Handler) error {
 	if _, ok := r.handlers[url]; ok {
 		r.log.Error("url: %s has been added", url)
@@ -29,6 +32,7 @@ func (r *Router) AddRouter(url string, handler http.Handler) error {
 	return nil
 }
 
+// ServeHTTP routers service
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if h, ok := r.handlers[req.URL.Path]; ok {
 		h.ServeHTTP(w, req)

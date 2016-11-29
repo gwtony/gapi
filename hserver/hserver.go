@@ -6,13 +6,14 @@ import (
 	"time"
 	"net/http"
 	//"io/ioutil"
-	"encoding/json"
-	"git.lianjia.com/lianjia-sysop/napi/variable"
-	"git.lianjia.com/lianjia-sysop/napi/log"
-	"git.lianjia.com/lianjia-sysop/napi/errors"
-	"git.lianjia.com/lianjia-sysop/napi/router"
+	//"encoding/json"
+	"github.com/gwtony/gapi/variable"
+	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/gapi/errors"
+	"github.com/gwtony/gapi/router"
 )
 
+// HttpServer http server
 type HttpServer struct {
 	addr        string
 	location    string
@@ -22,6 +23,9 @@ type HttpServer struct {
 	log         log.Log
 }
 
+var hserver *HttpServer
+
+// InitHttpServer inits http server
 func InitHttpServer(addr string, log log.Log) (*HttpServer, error) {
 	hs := &HttpServer{}
 
@@ -33,11 +37,13 @@ func InitHttpServer(addr string, log log.Log) (*HttpServer, error) {
 	return hs, nil
 }
 
+// AddRouter adds http server router
 func (hs *HttpServer) AddRouter(url string, h http.Handler) error {
 	return hs.router.AddRouter(url, h)
 }
 
 
+// Run runs http server
 func (hs *HttpServer) Run() error {
 	s := &http.Server{
 		Addr:           hs.addr,
@@ -49,45 +55,58 @@ func (hs *HttpServer) Run() error {
 	return s.ListenAndServe()
 }
 
-func ReturnError(w http.ResponseWriter, err error, log log.Log) {
+// ReturnError return http error
+func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, log log.Log) {
+	w.Header().Set("Content-Type", variable.DEFAULT_CONTENT_HEADER)
+
 	if err == errors.NoContentError {
-		log.Debug("Request no content")
+		// 204 should not return body(RFC) 
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusNoContent, msg, r.RemoteAddr)
 		http.Error(w, "", http.StatusNoContent)
 		return
 	}
 	if err == errors.BadRequestError {
-		log.Debug("Return bad request")
-		http.Error(w, "", http.StatusBadRequest)
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusBadRequest, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	if err == errors.ForbiddenError {
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusForbidden, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusForbidden)
 		return
 	}
 	if err == errors.BadGatewayError {
-		log.Debug("Return bad gateway")
-		http.Error(w, "", http.StatusBadGateway)
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusBadGateway, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusBadGateway)
+		return
+	}
+	if err == errors.ConflictError {
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusConflict, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusConflict)
 		return
 	}
 
-	log.Debug("Return internal server error")
-	http.Error(w, "", http.StatusInternalServerError)
+	log.Info("Return Error: (%d) %s to client: %s", http.StatusInternalServerError, msg, r.RemoteAddr)
+	http.Error(w, msg, http.StatusInternalServerError)
 }
 
-func ReturnResponse(w http.ResponseWriter, resp interface{}, log log.Log) {
-	if resp == nil {
-		log.Debug("Return OK")
-		w.WriteHeader(http.StatusOK)
-		return
+// ReturnResponse returns http response
+func ReturnResponse(r *http.Request, w http.ResponseWriter, msg string, log log.Log) {
+	if msg != "" {
+		log.Info("Return Ok: (200) %s to client: %s", msg, r.RemoteAddr)
+	} else {
+		log.Info("Return Ok: (200) to client: %s", r.RemoteAddr)
 	}
-	respj, err := json.Marshal(resp)
-	if err != nil {
-		log.Error("Encode json failed: ", resp)
-		http.Error(w, "", http.StatusInternalServerError)
+
+
+	if msg == "" {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
 	w.Header().Set("Content-Type", variable.DEFAULT_CONTENT_HEADER)
 	w.WriteHeader(http.StatusOK)
 
-	log.Debug("Return OK")
-
-	io.WriteString(w, string(respj))
+	io.WriteString(w, msg)
 }
 

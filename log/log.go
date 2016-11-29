@@ -2,18 +2,23 @@ package log
 
 import (
 	"code.google.com/p/log4go"
-	"git.lianjia.com/lianjia-sysop/napi/variable"
+	"github.com/gwtony/gapi/variable"
 )
+
+// Log function
 type Log interface {
-	Info(arg0 interface{}, args ...interface{})
-	Error(arg0 interface{}, args ...interface{})
 	Debug(arg0 interface{}, args ...interface{})
+	Info(arg0 interface{}, args ...interface{})
+	Warn(arg0 interface{}, args ...interface{})
+	Error(arg0 interface{}, args ...interface{})
 }
 
+// Logger logs log
 type Logger struct {
 	l log4go.Logger
 }
 
+// GetLogger generates logger from file
 func GetLogger(path string, level string) *Logger {
 	var log Logger
 
@@ -25,21 +30,24 @@ func GetLogger(path string, level string) *Logger {
 	switch level {
 	case "debug":
 		lv = log4go.DEBUG
-	case "error":
-		lv = log4go.ERROR
 	case "info":
 		lv = log4go.INFO
+	case "warn":
+		lv = log4go.WARNING
+	case "error":
+		lv = log4go.ERROR
 	}
 
 	l := log4go.NewDefaultLogger(lv)
-	flw := log4go.NewFileLogWriter(path, false)
+	flw := log4go.NewFileLogWriter(path, true)
 	if flw == nil {
 		return nil
 	}
 	flw.SetFormat("[%D %T] [%L] %M")
 	//flw.SetRotate(true)
-	//flw.SetRotateLines(50)
-	flw.SetRotateDaily(true)
+	flw.SetRotateLines(100000)
+	//flw.SetRotateDaily(true)
+	//l.AddFilter("stdout", lv, flw)
 	l.AddFilter("log", lv, flw)
 
 	log.l = l
@@ -47,14 +55,22 @@ func GetLogger(path string, level string) *Logger {
 	return &log
 }
 
+// Debug logs debug
+func (l *Logger) Debug(arg0 interface{}, args ...interface{}) {
+	l.l.Debug(arg0, args...)
+}
+
+// Info logs info
 func (l *Logger) Info(arg0 interface{}, args ...interface{}) {
 	l.l.Info(arg0, args...)
 }
 
-func (l *Logger) Error(arg0 interface{}, args ...interface{}) {
-	l.l.Error(arg0, args...)
+// Warn logs Warning
+func (l *Logger) Warn(arg0 interface{}, args ...interface{}) {
+	l.l.Warn(arg0, args...)
 }
 
-func (l *Logger) Debug(arg0 interface{}, args ...interface{}) {
-	l.l.Debug(arg0, args...)
+// Error logs error
+func (l *Logger) Error(arg0 interface{}, args ...interface{}) {
+	l.l.Error(arg0, args...)
 }

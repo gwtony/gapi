@@ -1,8 +1,8 @@
 package hserver
 
 import (
-	"git.lianjia.com/lianjia-sysop/napi/test"
-	"git.lianjia.com/lianjia-sysop/napi/errors"
+	"github.com/gwtony/gapi/test"
+	"github.com/gwtony/gapi/errors"
 	"testing"
 )
 
@@ -16,37 +16,37 @@ func TestInitHttpServer(t *testing.T) {
 }
 
 func TestReturnError1(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnError(w, errors.BadConfigError, log)
 }
 
 func TestReturnError2(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnError(w, errors.NoContentError, log)
 }
 
 func TestReturnError3(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnError(w, errors.BadRequestError, log)
 }
 
 func TestReturnError4(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnError(w, errors.InternalServerError, log)
 }
 
 func TestReturnError5(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnError(w, errors.BadGatewayError, log)
 }
 
 func TestReturnResponseOk(t *testing.T) {
-	w, _ := test.Test_generate_rr("GET", "/test", nil)
+	w, _ := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	ReturnResponse(w, 1, log)
 	t.Log("Return Response done")

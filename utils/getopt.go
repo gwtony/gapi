@@ -1,17 +1,28 @@
 package utils
 
-import "os"
-import "strings"
+import (
+	"os"
+	"flag"
+	"strings"
+	"github.com/gwtony/gapi/variable"
+)
 
+// EOF means reach the end
 const EOF = -1
 
+// OptErr Option error
 var OptErr = 1
+// OptInd Option index
 var OptInd = 1
+
+// OptOpt Current option
 var OptOpt uint8
+// OptArg Current option args
 var OptArg string
 
 var sp = 1
 
+// Getopt gets option
 func Getopt(opts string) int {
 	var c uint8
 	var cp int
@@ -55,10 +66,9 @@ func Getopt(opts string) int {
 				}
 				sp = 1
 				return '?'
-			} else {
-				OptArg = argv[OptInd]
-				OptInd++
 			}
+			OptArg = argv[OptInd]
+			OptInd++
 		}
 		sp = 1
 	} else {
@@ -70,4 +80,19 @@ func Getopt(opts string) int {
 		OptArg = ""
 	}
 	return int(c)
+}
+
+var (
+	ConfigFile = flag.String("f", "", "Set config file to macedon")
+	Version    = flag.Bool("v", false, "Show version")
+)
+
+func ParseOption() int {
+	flag.Parse()
+	if *Version {
+		println("Version is", variable.VERSION)
+		return -1
+	}
+
+	return 0
 }

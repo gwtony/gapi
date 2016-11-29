@@ -2,8 +2,8 @@ package router
 
 import (
 	//"net/http"
-	//"git.lianjia.com/lianjia-sysop/napi/log"
-	"git.lianjia.com/lianjia-sysop/napi/test"
+	//"github.com/gwtony/gapi/log"
+	"github.com/gwtony/gapi/test"
 	"testing"
 
 )
@@ -25,7 +25,7 @@ func TestAddRouterOk(t *testing.T) {
 	t.Log("add router done")
 }
 func TestServeHTTPOk(t *testing.T) {
-	w, req := test.Test_generate_rr("GET", "/test", nil)
+	w, req := test.TestGenerateRR("GET", "/test", nil)
 	log := test.TestInitlog()
 	r := InitRouter(log)
 	r.AddRouter("/test", &test.Thandler{})
