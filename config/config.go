@@ -12,7 +12,9 @@ import (
 
 // Config of server
 type Config struct {
-	Addr       string  /* server bind address */
+	HttpAddr   string  /* http server bind address */
+	UdpAddr    string  /* udp server bind address */
+	TcpAddr    string  /* tcp server bind address */
 
 	Location   string  /* handler location */
 
@@ -46,10 +48,20 @@ func (conf *Config) ParseConf() error {
 		return errors.BadConfigError
 	}
 
-	conf.Addr, err = conf.C.GetString("default", "addr")
+	conf.HttpAddr, err = conf.C.GetString("default", "http_addr")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Error] [Default] Read conf: No addr")
-		return err
+		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No HttpAddr")
+		conf.HttpAddr = ""
+	}
+	conf.TcpAddr, err = conf.C.GetString("default", "tcp_addr")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No TcpAddr")
+		conf.UdpAddr = ""
+	}
+	conf.UdpAddr, err = conf.C.GetString("default", "udp_addr")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No UdpAddr")
+		conf.UdpAddr = ""
 	}
 
 	conf.Log, err = conf.C.GetString("default", "log")

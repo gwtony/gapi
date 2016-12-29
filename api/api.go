@@ -78,7 +78,7 @@ func Run() {
 	}
 }
 
-func AddHandler(url string, handler http.Handler) {
+func AddHttpHandler(url string, handler http.Handler) {
 	api.server.GetHserver().AddRouter(url, handler)
 }
 

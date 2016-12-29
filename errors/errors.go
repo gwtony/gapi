@@ -15,6 +15,14 @@ var (
 	ParseConfigError     = errors.New("Parse Config Error")
 	// InitLogError server init log error
 	InitLogError         = errors.New("Init Log Error")
+	// InitServerError init server error
+	InitServerError      = errors.New("Init Server Error")
+
+	InitHttpServerError  = errors.New("Init Http Server Error")
+	InitTcpServerError   = errors.New("Init Tcp Server Error")
+	InitUdpServerError   = errors.New("Init Udp Server Error")
+
+	NoHandlerError       = errors.New("No Handler Error")
 
 	// Http server errors
 	// BadConfigError http bad config error

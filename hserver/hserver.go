@@ -44,7 +44,7 @@ func (hs *HttpServer) AddRouter(url string, h http.Handler) error {
 
 
 // Run runs http server
-func (hs *HttpServer) Run() error {
+func (hs *HttpServer) Run(ch chan int) error {
 	s := &http.Server{
 		Addr:           hs.addr,
 		ReadTimeout:    10 * time.Second,
@@ -52,7 +52,9 @@ func (hs *HttpServer) Run() error {
 		Handler:        hs.router,
 	}
 
-	return s.ListenAndServe()
+	err := s.ListenAndServe()
+	ch<-1
+	return err
 }
 
 // ReturnError return http error

@@ -18,5 +18,6 @@ const (
 	HTTP_CONFLICT           = 409
 	HTTP_NOT_FOUND          = 404
 
-	DEFAULT_QUIT_WAIT_TIME = time.Millisecond * 200
+	DEFAULT_QUIT_WAIT_TIME  = time.Millisecond * 200
+	UDP_DEFAULT_BUFFER_SIZE = 4096
 )
