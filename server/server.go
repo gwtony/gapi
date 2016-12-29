@@ -107,7 +107,12 @@ func (s *Server) Run() error {
 	return nil
 }
 
-//TODO: get more server
-func (s *Server) GetHserver() (*hserver.HttpServer) {
+func (s *Server) GetHttpServer() (*hserver.HttpServer) {
 	return s.hs
+}
+func (s *Server) GetUdpServer() (*userver.UdpServer) {
+	return s.us
+}
+func (s *Server) GetTcpServer() (*tserver.TcpServer) {
+	return s.ts
 }

@@ -22,6 +22,9 @@ type apiContext struct {
 
 var api apiContext
 
+//type TcpHandler func(net.Conn, log.Log)
+//type UdpHandler func([]byte, int, log.Log)
+
 // Run runs program
 func Init() error {
 	if utils.ParseOption() < 0 {
@@ -79,7 +82,15 @@ func Run() {
 }
 
 func AddHttpHandler(url string, handler http.Handler) {
-	api.server.GetHserver().AddRouter(url, handler)
+	api.server.GetHttpServer().AddRouter(url, handler)
+}
+
+func AddTcpHandler(handler tserver.TcpHandler) {
+	api.server.GetTcpServer().AddHandler(handler)
+}
+
+func AddUdpHandler(handler userver.UdpHandler) {
+	api.server.GetUdpServer().AddHandler(handler)
 }
 
 func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, log log.Log) {
