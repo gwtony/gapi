@@ -15,7 +15,9 @@ import (
 	//"github.com/gwtony/gapi/router"
 )
 
-type TcpHandler func(net.Conn, log.Log)
+type TcpHandler interface {
+	ServTcp(net.Conn)
+}
 
 // TcpServer http server
 type TcpServer struct {
@@ -44,7 +46,6 @@ func InitTcpServer(addr string, log log.Log) (*TcpServer, error) {
 	//ts.port, _ = strconv.Atoi(addr_s[1])
 	ts.log  = log
 	//ts.bufSize = variable.UDP_DEFAULT_BUFFER_SIZE
-	ts.handler = nil
 
 	return ts, nil
 }
@@ -82,7 +83,7 @@ func (ts *TcpServer) Run(ch chan int) error {
 		if err != nil {
 			ts.log.Error("Accept tcp failed", err)
 		}
-		go ts.handler(conn, ts.log)
+		go ts.handler.ServTcp(conn)
 	}
 
 	ch<-0

@@ -10,6 +10,9 @@ import (
 	"github.com/gwtony/gapi/utils"
 	"github.com/gwtony/gapi/server"
 	"github.com/gwtony/gapi/hserver"
+	"github.com/gwtony/gapi/tserver"
+	"github.com/gwtony/gapi/userver"
+	"github.com/gwtony/gapi/usocket"
 	"github.com/gwtony/gapi/config"
 	"github.com/gwtony/gapi/variable"
 )
@@ -92,6 +95,9 @@ func AddTcpHandler(handler tserver.TcpHandler) {
 func AddUdpHandler(handler userver.UdpHandler) {
 	api.server.GetUdpServer().AddHandler(handler)
 }
+func AddUsocketHandler(handler usocket.UsocketHandler) {
+	api.server.GetUsocketServer().AddHandler(handler)
+}
 
 func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, log log.Log) {
 	hserver.ReturnError(r, w, msg, err, log)
@@ -99,4 +105,8 @@ func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, 
 
 func ReturnResponse(r *http.Request, w http.ResponseWriter, msg string, log log.Log) {
 	hserver.ReturnResponse(r, w, msg, log)
+}
+
+func SetConfig(file string) {
+	api.config.SetConf(file)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gwtony/gapi/userver"
 	"github.com/gwtony/gapi/hserver"
 	"github.com/gwtony/gapi/tserver"
+	"github.com/gwtony/gapi/usocket"
 	"github.com/gwtony/gapi/config"
 	"github.com/gwtony/gapi/errors"
 	"github.com/gwtony/gapi/log"
@@ -15,14 +16,17 @@ type Server struct {
 	haddr   string
 	taddr   string
 	uaddr   string
+	usaddr  string
 
 	hsch    chan int
 	usch    chan int
 	tsch    chan int
+	ussch   chan int
 
 	hs      *hserver.HttpServer
 	us      *userver.UdpServer
 	ts      *tserver.TcpServer
+	uss     *usocket.UsocketServer
 
 	log     log.Log
 }
@@ -36,6 +40,7 @@ func InitServer(conf *config.Config, log log.Log) (*Server, error) {
 	s.hsch = make(chan int, 1)
 	s.usch = make(chan int, 1)
 	s.tsch = make(chan int, 1)
+	s.ussch = make(chan int, 1)
 
 	if conf.HttpAddr != "" {
 		s.haddr = conf.HttpAddr
@@ -67,7 +72,17 @@ func InitServer(conf *config.Config, log log.Log) (*Server, error) {
 		s.ts = ts
 	}
 
-	if s.hs == nil && s.us == nil && s.ts == nil {
+	if conf.UsocketAddr != "" {
+		s.usaddr = conf.UsocketAddr
+		uss, err := usocket.InitUsocketServer(conf.UsocketAddr, s.log)
+		if err != nil {
+			s.log.Error("Init usocket server failed")
+			return nil, err
+		}
+		s.uss = uss
+	}
+
+	if s.hs == nil && s.us == nil && s.ts == nil && s.uss == nil {
 		s.log.Error("No server inited")
 		return nil, errors.InitServerError
 	}
@@ -88,7 +103,10 @@ func (s *Server) Run() error {
 		go s.us.Run(s.usch)
 	}
 	if s.ts != nil {
-		go s.us.Run(s.tsch)
+		go s.ts.Run(s.tsch)
+	}
+	if s.uss != nil {
+		go s.uss.Run(s.ussch)
 	}
 
 	//TODO: monitor or something
@@ -101,6 +119,9 @@ func (s *Server) Run() error {
 			break
 		case <-s.tsch:
 			s.log.Error("tcp server run failed")
+			break
+		case <-s.ussch:
+			s.log.Error("usocket server run failed")
 			break
 	}
 
@@ -115,4 +136,7 @@ func (s *Server) GetUdpServer() (*userver.UdpServer) {
 }
 func (s *Server) GetTcpServer() (*tserver.TcpServer) {
 	return s.ts
+}
+func (s *Server) GetUsocketServer() (*usocket.UsocketServer) {
+	return s.uss
 }

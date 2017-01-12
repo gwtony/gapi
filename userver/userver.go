@@ -15,12 +15,14 @@ import (
 	//"github.com/gwtony/gapi/router"
 )
 
-type UdpHandler func([]byte, int, log.Log)
-
+type UdpHandler interface {
+	ServUdp([]byte, int)
+}
 // UdpServer http server
 type UdpServer struct {
 	ip      net.IP
 	port    int
+	//nfi     *net.Interface
 
 	handler UdpHandler
 	bufSize int
@@ -38,6 +40,14 @@ func InitUdpServer(addr string, log log.Log) (*UdpServer, error) {
 	if len(addr_s) != 2 {
 		return nil, errors.InitUdpServerError
 	}
+
+	//us.nfi = nil
+	//if nfi != "" {
+	//	nfi, err := net.InterfaceByName(nfi)
+	//	if err != nil {
+	//		us.nfi = nfi
+	//	}
+	//}
 	us.ip = net.ParseIP(addr_s[0])
 	us.port, _ = strconv.Atoi(addr_s[1])
 	us.log  = log
@@ -48,7 +58,6 @@ func InitUdpServer(addr string, log log.Log) (*UdpServer, error) {
 
 // AddHandler adds udp server handler
 func (us *UdpServer) AddHandler(uh UdpHandler) {
-//func (us *UdpServer) AddHandler(uh func([]byte, int, log.Log)) {
 	us.handler = uh
 }
 
@@ -62,6 +71,12 @@ func (us *UdpServer) SetBuffer(size int) {
 // Run runs udp server
 func (us *UdpServer) Run(ch chan int) error {
 	//TODO: set timeout
+	us.log.Debug("udp ip is ", us.ip)
+	//if us.nfi != nil {
+	//	uc, err := net.ListenMulticastUDP("udp", us.nfi, &net.UDPAddr{IP: us.ip, Port: us.port})
+	//} else {
+	//	uc, err := net.ListenUDP("udp", &net.UDPAddr{IP: us.ip, Port: us.port})
+	//}
 	uc, err := net.ListenUDP("udp", &net.UDPAddr{IP: us.ip, Port: us.port})
     if err != nil {
         // handle error
@@ -78,7 +93,7 @@ func (us *UdpServer) Run(ch chan int) error {
             continue
         }
 		us.log.Debug("Read %d from address: %s", ret, addr)
-        go us.handler(buf, ret, us.log)
+        go us.handler.ServUdp(buf, ret)
     }
 	ch<-0
 	return nil

@@ -12,22 +12,33 @@ import (
 
 // Config of server
 type Config struct {
-	HttpAddr   string  /* http server bind address */
-	UdpAddr    string  /* udp server bind address */
-	TcpAddr    string  /* tcp server bind address */
+	HttpAddr    string  /* http server bind address */
+	UdpAddr     string  /* udp server bind address */
+	TcpAddr     string  /* tcp server bind address */
+	UsocketAddr string  /* usocket server bind address */
 
-	Location   string  /* handler location */
+	//UdpNFI     string  /* udp server multicast receive interface */
 
-	Log        string  /* log file */
-	Level      string  /* log level */
+	Location    string  /* handler location */
 
-	C          *goconf.ConfigFile /* goconfig struct */
+	Log         string  /* log file */
+	Level       string  /* log level */
+
+	File        string  /* config file */
+	C           *goconf.ConfigFile /* goconfig struct */
 }
 
+func (conf *Config) SetConf(file string) {
+	conf.File = file
+}
 // ReadConf reads conf from file
 func (conf *Config) ReadConf(file string) error {
 	if file == "" {
-		file = filepath.Join(variable.DEFAULT_CONFIG_PATH, variable.DEFAULT_CONFIG_FILE)
+		if conf.File == "" {
+			file = filepath.Join(variable.DEFAULT_CONFIG_PATH, variable.DEFAULT_CONFIG_FILE)
+		} else {
+			file = conf.File
+		}
 	}
 
 	c, err := goconf.ReadConfigFile(file)
@@ -50,19 +61,39 @@ func (conf *Config) ParseConf() error {
 
 	conf.HttpAddr, err = conf.C.GetString("default", "http_addr")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No HttpAddr")
+		//fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No HttpAddr")
 		conf.HttpAddr = ""
+	} else {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] listen on http addr:", conf.HttpAddr)
 	}
+
 	conf.TcpAddr, err = conf.C.GetString("default", "tcp_addr")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No TcpAddr")
+		//fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No TcpAddr")
 		conf.UdpAddr = ""
+	} else {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] listen on tcp addr:", conf.TcpAddr)
 	}
 	conf.UdpAddr, err = conf.C.GetString("default", "udp_addr")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No UdpAddr")
+		//fmt.Fprintln(os.Stderr, "[Info] [Default] Read conf: No UdpAddr")
 		conf.UdpAddr = ""
+	} else {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] listen on udp addr:", conf.UdpAddr)
 	}
+
+	conf.UsocketAddr, err = conf.C.GetString("default", "usocket_addr")
+	if err != nil {
+		conf.UsocketAddr = ""
+	} else {
+		fmt.Fprintln(os.Stderr, "[Info] [Default] listen on usocket addr:", conf.UsocketAddr)
+	}
+	//conf.UdpAddr, err = conf.C.GetString("default", "udp_interface")
+	//if err != nil {
+	//	conf.UdpNIF = ""
+	//} else {
+	//	fmt.Fprintln(os.Stderr, "[Info] [Default] use udp network interface:", conf.UdpNIF)
+	//}
 
 	conf.Log, err = conf.C.GetString("default", "log")
 	if err != nil {
