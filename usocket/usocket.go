@@ -101,7 +101,7 @@ func (us *UsocketServer) Run(ch chan int) error {
             continue
         }
 		us.log.Debug("Read %d from address: %s", ret, addr)
-        go us.handler.ServUsocket(buf, ret)
+        us.handler.ServUsocket(buf, ret)
     }
 	ch<-0
 	return nil

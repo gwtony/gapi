@@ -17,6 +17,8 @@ var (
 	InitLogError         = errors.New("Init Log Error")
 	// InitServerError init server error
 	InitServerError      = errors.New("Init Server Error")
+	// LookupHostError lookup hostname error
+	LookupHostError      = errors.New("Lookup Host Error")
 
 	InitHttpServerError  = errors.New("Init Http Server Error")
 	InitTcpServerError   = errors.New("Init Tcp Server Error")

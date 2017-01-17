@@ -93,7 +93,7 @@ func (us *UdpServer) Run(ch chan int) error {
             continue
         }
 		us.log.Debug("Read %d from address: %s", ret, addr)
-        go us.handler.ServUdp(buf, ret)
+        us.handler.ServUdp(buf, ret)
     }
 	ch<-0
 	return nil
