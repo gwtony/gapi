@@ -92,6 +92,7 @@ func (us *UsocketServer) Run(ch chan int) error {
 		ch<-1
         return err
     }
+	os.Chmod(us.socket, 0777)
 
 	buf := make([]byte, us.bufSize)
     for {
