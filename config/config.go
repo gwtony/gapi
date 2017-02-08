@@ -29,7 +29,7 @@ type Config struct {
 }
 
 func (conf *Config) SetConf(file string) {
-	conf.File = file
+	conf.File = filepath.Join(variable.DEFAULT_CONFIG_PATH, file)
 }
 // ReadConf reads conf from file
 func (conf *Config) ReadConf(file string) error {

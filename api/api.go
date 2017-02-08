@@ -29,12 +29,15 @@ var api apiContext
 //type UdpHandler func([]byte, int, log.Log)
 
 // Run runs program
-func Init() error {
+func Init(file string) error {
 	if utils.ParseOption() < 0 {
 		return errors.ParseOptionError
 	}
 
 	conf := new(config.Config)
+	if file != "" {
+		conf.SetConf(file)
+	}
 	err := conf.ReadConf(*utils.ConfigFile)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "[Error] Read config file failed")
