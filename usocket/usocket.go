@@ -3,7 +3,7 @@ package usocket
 import (
 	//"fmt"
 	//"io"
-	//"time"
+	"time"
 	"os"
 	"net"
 	//"strings"
@@ -47,7 +47,7 @@ func InitUsocketServer(addr string, log log.Log) (*UsocketServer, error) {
 	//us.ip = net.ParseIP(addr_s[0])
 	//us.port, _ = strconv.Atoi(addr_s[1])
 	us.log  = log
-	us.bufSize = variable.UDP_DEFAULT_BUFFER_SIZE
+	us.bufSize = variable.USOCK_DEFAULT_BUFFER_SIZE
 
 	return us, nil
 }
@@ -58,7 +58,7 @@ func (us *UsocketServer) AddHandler(uh UsocketHandler) {
 }
 
 func (us *UsocketServer) SetBuffer(size int) {
-	if size > variable.UDP_DEFAULT_BUFFER_SIZE {
+	if size > variable.USOCK_DEFAULT_BUFFER_SIZE {
 		us.bufSize = size
 	}
 }
@@ -94,6 +94,7 @@ func (us *UsocketServer) Run(ch chan int) error {
     }
 	os.Chmod(us.socket, 0777)
 
+	//go func() {
 	buf := make([]byte, us.bufSize)
     for {
         ret, addr, err := uc.ReadFrom(buf)
@@ -102,8 +103,14 @@ func (us *UsocketServer) Run(ch chan int) error {
             continue
         }
 		us.log.Debug("Read %d from address: %s", ret, us.socket)
-        us.handler.ServUsocket(buf, ret)
+        go us.handler.ServUsocket(buf, ret)
     }
+	//}()
+
+	//for {
+	//	time.Sleep(time.Second * 10)
+	//}
+
 	ch<-0
 	return nil
 }
