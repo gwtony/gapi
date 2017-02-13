@@ -3,7 +3,7 @@ package usocket
 import (
 	//"fmt"
 	//"io"
-	"time"
+	//"time"
 	"os"
 	"net"
 	//"strings"
@@ -95,8 +95,9 @@ func (us *UsocketServer) Run(ch chan int) error {
 	os.Chmod(us.socket, 0777)
 
 	//go func() {
-	buf := make([]byte, us.bufSize)
+	//buf := make([]byte, us.bufSize)
     for {
+		buf := make([]byte, us.bufSize)
         ret, addr, err := uc.ReadFrom(buf)
         if err != nil {
 			us.log.Error("Read from %s failed", addr)
