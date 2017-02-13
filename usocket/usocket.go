@@ -94,23 +94,20 @@ func (us *UsocketServer) Run(ch chan int) error {
     }
 	os.Chmod(us.socket, 0777)
 
-	//go func() {
-	//buf := make([]byte, us.bufSize)
+	buf := make([]byte, us.bufSize)
     for {
-		buf := make([]byte, us.bufSize)
+		//this will cause big memory leak
+		//buf := make([]byte, us.bufSize)
         ret, addr, err := uc.ReadFrom(buf)
         if err != nil {
 			us.log.Error("Read from %s failed", addr)
             continue
         }
 		us.log.Debug("Read %d from address: %s", ret, us.socket)
-        go us.handler.ServUsocket(buf, ret)
-    }
-	//}()
 
-	//for {
-	//	time.Sleep(time.Second * 10)
-	//}
+		//Need not goroutine, or buf will be confused
+        us.handler.ServUsocket(buf, ret)
+    }
 
 	ch<-0
 	return nil
