@@ -19,7 +19,7 @@ type Logger struct {
 }
 
 // GetLogger generates logger from file
-func GetLogger(path string, level string) *Logger {
+func GetLogger(path, level string, line int) *Logger {
 	var log Logger
 
 	if path == "" {
@@ -45,7 +45,7 @@ func GetLogger(path string, level string) *Logger {
 	}
 	flw.SetFormat("[%D %T] [%L] %M")
 	//flw.SetRotate(true)
-	flw.SetRotateLines(100000)
+	flw.SetRotateLines(line)
 	//flw.SetRotateDaily(true)
 	//l.AddFilter("stdout", lv, flw)
 	l.AddFilter("log", lv, flw)

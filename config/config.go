@@ -23,6 +23,7 @@ type Config struct {
 
 	Log         string  /* log file */
 	Level       string  /* log level */
+	RotateLine  int     /* log rotate line */
 
 	File        string  /* config file */
 	C           *goconf.ConfigFile /* goconfig struct */
@@ -97,14 +98,20 @@ func (conf *Config) ParseConf() error {
 
 	conf.Log, err = conf.C.GetString("default", "log")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "[Info] [Default] Log not found, use default log file")
+		fmt.Fprintln(os.Stderr, "[Info] [Default] log not found, use default log file")
 		conf.Log = ""
 	}
 	conf.Level, err = conf.C.GetString("default", "level")
 	if err != nil {
 		conf.Level = "error"
-		fmt.Fprintln(os.Stderr, "[Info] [Default] Level not found, use default log level error")
+		fmt.Fprintln(os.Stderr, "[Info] [Default] level not found, use default log level error")
 	}
+	rline, err := conf.C.GetInt64("default", "rotate_line")
+	if err != nil {
+		rline = variable.DEFAULT_ROTATE_LINE
+		fmt.Fprintln(os.Stderr, "[Info] [Default] rotate line not found, use default line")
+	}
+	conf.RotateLine = int(rline)
 
 	return nil
 }

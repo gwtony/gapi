@@ -52,7 +52,7 @@ func Init(file string) error {
 	}
 	api.config = conf
 
-    rlog := log.GetLogger(conf.Log, conf.Level)
+    rlog := log.GetLogger(conf.Log, conf.Level, conf.RotateLine)
 	if rlog == nil {
 		fmt.Fprintln(os.Stderr, "[Error] Init log failed")
 		time.Sleep(variable.DEFAULT_QUIT_WAIT_TIME)
