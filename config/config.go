@@ -109,7 +109,7 @@ func (conf *Config) ParseConf() error {
 	rline, err := conf.C.GetInt64("default", "rotate_line")
 	if err != nil {
 		rline = variable.DEFAULT_ROTATE_LINE
-		fmt.Fprintln(os.Stderr, "[Info] [Default] rotate line not found, use default line")
+		fmt.Fprintln(os.Stderr, "[Info] [Default] rotate_line not found, use default", rline)
 	}
 	conf.RotateLine = int(rline)
 
