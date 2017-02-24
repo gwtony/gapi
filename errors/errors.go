@@ -30,6 +30,8 @@ var (
 	// Http server errors
 	// BadConfigError http bad config error
 	BadConfigError       = errors.New("Bad Config")
+	// UnauthorizedError http unauthorized error
+	UnauthorizedError    = errors.New("Unauthorized")
 	// NoContentError http No Content error
 	NoContentError       = errors.New("No Content")
 	// BadRequestError http bad request error
