@@ -34,6 +34,8 @@ var (
 	NoContentError       = errors.New("No Content")
 	// BadRequestError http bad request error
 	BadRequestError      = errors.New("Bad Request")
+	// NotAcceptableError http tot acceptable error
+	NotAcceptableError   = errors.New("Not Acceptable")
 	// ForbiddenError http forbidden error
 	ForbiddenError       = errors.New("Forbidden")
 	// ConflictError http conflict error
