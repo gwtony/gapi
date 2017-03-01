@@ -1,7 +1,7 @@
 package log
 
 import (
-	"code.google.com/p/log4go"
+	"github.com/gwtony/log4go"
 	"github.com/gwtony/gapi/variable"
 )
 
