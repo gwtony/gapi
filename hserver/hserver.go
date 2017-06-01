@@ -87,6 +87,11 @@ func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, 
 		http.Error(w, msg, http.StatusConflict)
 		return
 	}
+	if err == errors.UnauthorizedError {
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusUnauthorized, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusUnauthorized)
+		return
+	}
 
 	log.Info("Return Error: (%d) %s to client: %s", http.StatusInternalServerError, msg, r.RemoteAddr)
 	http.Error(w, msg, http.StatusInternalServerError)

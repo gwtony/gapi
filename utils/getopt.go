@@ -83,7 +83,7 @@ func Getopt(opts string) int {
 }
 
 var (
-	ConfigFile = flag.String("f", "", "Set config file to macedon")
+	ConfigFile = flag.String("f", "", "Set config file")
 	Version    = flag.Bool("v", false, "Show version")
 )
 
