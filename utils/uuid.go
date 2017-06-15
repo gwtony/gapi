@@ -30,7 +30,7 @@ func NewUUID() (string, error) {
 
 	uuid := make([]byte, 16)
 
-		// get timestamp
+	// get timestamp
 	now := time.Now().UTC()
 	timestamp := uint64(now.UnixNano()/100) + intervals // get timestamp
 	if !now.After(lastGenerated) {
