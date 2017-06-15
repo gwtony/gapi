@@ -92,6 +92,11 @@ func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, 
 		http.Error(w, msg, http.StatusUnauthorized)
 		return
 	}
+	if err == errors.NotAcceptableError {
+		log.Info("Return Error: (%d) %s to client: %s", http.StatusNotAcceptable, msg, r.RemoteAddr)
+		http.Error(w, msg, http.StatusNotAcceptable)
+		return
+	}
 
 	log.Info("Return Error: (%d) %s to client: %s", http.StatusInternalServerError, msg, r.RemoteAddr)
 	http.Error(w, msg, http.StatusInternalServerError)
