@@ -1,4 +1,4 @@
-packag utils
+package utils
 import (
 	"unsafe"
 )
