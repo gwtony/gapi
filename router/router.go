@@ -2,17 +2,17 @@ package router
 
 import (
 	"net/http"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 )
 
 // Router is HTTP router
 type Router struct {
 	handlers map[string]http.Handler
-	log log.Log
+	log logger.Log
 }
 
 // InitRouter inits router
-func InitRouter(log log.Log) *Router {
+func InitRouter(log logger.Log) *Router {
 	r := &Router{}
 	r.handlers = make(map[string]http.Handler)
 	r.log = log
@@ -23,7 +23,7 @@ func InitRouter(log log.Log) *Router {
 // AddRouter adds a url router
 func (r *Router) AddRouter(url string, handler http.Handler) error {
 	if _, ok := r.handlers[url]; ok {
-		r.log.Error("url: %s has been added", url)
+		r.log.Error("Url has been added", logger.String("url", url))
 		//TODO: add some error
 		return nil
 	}

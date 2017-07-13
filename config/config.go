@@ -23,7 +23,8 @@ type Config struct {
 
 	Log         string  /* log file */
 	Level       string  /* log level */
-	RotateLine  int     /* log rotate line */
+	RotateSize  int     /* log rotate line */
+	BackupSize  int     /* log backup size */
 
 	File        string  /* config file */
 	C           *goconf.ConfigFile /* goconfig struct */
@@ -106,12 +107,19 @@ func (conf *Config) ParseConf() error {
 		conf.Level = "error"
 		fmt.Fprintln(os.Stderr, "[Info] [Default] level not found, use default log level error")
 	}
-	rline, err := conf.C.GetInt64("default", "rotate_line")
+	rsize, err := conf.C.GetInt64("default", "rotate_size")
 	if err != nil {
-		rline = variable.DEFAULT_ROTATE_LINE
-		fmt.Fprintln(os.Stderr, "[Info] [Default] rotate_line not found, use default", rline)
+		rsize = variable.DEFAULT_ROTATE_SIZE
+		fmt.Fprintln(os.Stderr, "[Info] [Default] rotate_size not found, use default", rsize)
 	}
-	conf.RotateLine = int(rline)
+	conf.RotateSize = int(rsize)
+
+	bksize, err := conf.C.GetInt64("default", "backup_size")
+	if err != nil {
+		bksize = variable.DEFAULT_BACKUP_SIZE
+		fmt.Fprintln(os.Stderr, "[Info] [Default] backup_size not found, use default", bksize)
+	}
+	conf.BackupSize = int(bksize)
 
 	return nil
 }

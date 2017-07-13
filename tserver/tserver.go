@@ -10,7 +10,7 @@ import (
 	//"io/ioutil"
 	//"encoding/json"
 	//"github.com/gwtony/gapi/variable"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 	"github.com/gwtony/gapi/errors"
 	//"github.com/gwtony/gapi/router"
 )
@@ -28,13 +28,13 @@ type TcpServer struct {
 	handler TcpHandler
 	//bufSize int
 
-	log   log.Log
+	log   logger.Log
 }
 
 var tserver *TcpServer
 
 // InitTcpServer inits udp server
-func InitTcpServer(addr string, log log.Log) (*TcpServer, error) {
+func InitTcpServer(addr string, log logger.Log) (*TcpServer, error) {
 	ts := &TcpServer{}
 
 	ts.addr = addr
@@ -73,7 +73,7 @@ func (ts *TcpServer) Run(ch chan int) error {
 
 	ln, err := net.Listen("tcp", ts.addr)
 	if err != nil {
-		ts.log.Error("Listen tcp failed", err)
+		ts.log.Error("Listen tcp failed", logger.Err(err))
 		ch<-1
 		return err
 	}
@@ -81,7 +81,7 @@ func (ts *TcpServer) Run(ch chan int) error {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			ts.log.Error("Accept tcp failed", err)
+			ts.log.Error("Accept tcp failed", logger.Err(err))
 		}
 		go ts.handler.ServTcp(conn)
 	}

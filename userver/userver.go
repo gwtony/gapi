@@ -10,7 +10,7 @@ import (
 	//"io/ioutil"
 	//"encoding/json"
 	"github.com/gwtony/gapi/variable"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 	"github.com/gwtony/gapi/errors"
 	//"github.com/gwtony/gapi/router"
 )
@@ -27,13 +27,13 @@ type UdpServer struct {
 	handler UdpHandler
 	bufSize int
 
-	log     log.Log
+	log     logger.Log
 }
 
 var userver *UdpServer
 
 // InitUdpServer inits udp server
-func InitUdpServer(addr string, log log.Log) (*UdpServer, error) {
+func InitUdpServer(addr string, log logger.Log) (*UdpServer, error) {
 	us := &UdpServer{}
 
 	addr_s := strings.Split(addr, ":")
@@ -71,7 +71,7 @@ func (us *UdpServer) SetBuffer(size int) {
 // Run runs udp server
 func (us *UdpServer) Run(ch chan int) error {
 	//TODO: set timeout
-	us.log.Debug("udp ip is ", us.ip)
+	us.log.Debug("udp ip", logger.String("ip", us.ip.String()))
 	//if us.nfi != nil {
 	//	uc, err := net.ListenMulticastUDP("udp", us.nfi, &net.UDPAddr{IP: us.ip, Port: us.port})
 	//} else {
@@ -89,10 +89,10 @@ func (us *UdpServer) Run(ch chan int) error {
     for {
         ret, addr, err := uc.ReadFrom(buf)
         if err != nil {
-			us.log.Error("Read from %s failed", addr)
+			us.log.Error("Read from client failed", logger.String("remote", addr.String()))
             continue
         }
-		us.log.Debug("Read %d from address: %s", ret, addr)
+		us.log.Debug("Read from address success", logger.Int("size", ret), logger.String("remote", addr.String()))
         us.handler.ServUdp(buf, ret)
     }
 	ch<-0

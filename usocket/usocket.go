@@ -11,7 +11,7 @@ import (
 	//"io/ioutil"
 	//"encoding/json"
 	"github.com/gwtony/gapi/variable"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 	//"github.com/gwtony/gapi/errors"
 	//"github.com/gwtony/gapi/router"
 )
@@ -29,13 +29,13 @@ type UsocketServer struct {
 	handler UsocketHandler
 	bufSize int
 
-	log     log.Log
+	log     logger.Log
 }
 
 var usocket *UsocketServer
 
 // InitUsocketServer inits usocket server
-func InitUsocketServer(addr string, log log.Log) (*UsocketServer, error) {
+func InitUsocketServer(addr string, log logger.Log) (*UsocketServer, error) {
 	us := &UsocketServer{}
 
 	//addr_s := strings.Split(addr, ":")
@@ -67,17 +67,17 @@ func (us *UsocketServer) SetBuffer(size int) {
 // Run runs udp server
 func (us *UsocketServer) Run(ch chan int) error {
 	//TODO: set timeout
-	us.log.Debug("usocket file is ", us.socket)
+	us.log.Debug("usocket file is ", logger.String("socket", us.socket))
 	addr, err := net.ResolveUnixAddr("unixgram", us.socket)
 	if err != nil {
-		us.log.Error("Cannot resolve unix addr: " + err.Error())
+		us.log.Error("Cannot resolve unix addr", logger.Err(err))
 		ch<-1
 		return err
 	}
 	os.Remove(us.socket)
 	uc, err := net.ListenUnixgram("unixgram", addr)
 	if err != nil {
-		us.log.Error("Cannot listen to unix domain socket:" + err.Error())
+		us.log.Error("Cannot listen to unix domain socket", logger.Err(err))
 		ch<-1
 		return err
 	}
@@ -100,10 +100,10 @@ func (us *UsocketServer) Run(ch chan int) error {
 		//buf := make([]byte, us.bufSize)
         ret, addr, err := uc.ReadFrom(buf)
         if err != nil {
-			us.log.Error("Read from %s failed", addr)
+			us.log.Error("Read from client failed", logger.String("remote", addr.String()))
             continue
         }
-		us.log.Debug("Read %d from address: %s", ret, us.socket)
+		us.log.Debug("Read from address success", logger.Int("size", ret), logger.String("socket", us.socket))
 
 		//Need not goroutine, or buf will be confused
         us.handler.ServUsocket(buf, ret)

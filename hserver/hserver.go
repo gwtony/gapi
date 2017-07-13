@@ -8,7 +8,7 @@ import (
 	//"io/ioutil"
 	//"encoding/json"
 	"github.com/gwtony/gapi/variable"
-	"github.com/gwtony/gapi/log"
+	"github.com/gwtony/logger"
 	"github.com/gwtony/gapi/errors"
 	"github.com/gwtony/gapi/router"
 )
@@ -20,13 +20,13 @@ type HttpServer struct {
 
 	router      *router.Router
 
-	log         log.Log
+	log         logger.Log
 }
 
 var hserver *HttpServer
 
 // InitHttpServer inits http server
-func InitHttpServer(addr string, log log.Log) (*HttpServer, error) {
+func InitHttpServer(addr string, log logger.Log) (*HttpServer, error) {
 	hs := &HttpServer{}
 
 	hs.addr = addr
@@ -58,58 +58,57 @@ func (hs *HttpServer) Run(ch chan int) error {
 }
 
 // ReturnError return http error
-func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, log log.Log) {
+func ReturnError(r *http.Request, w http.ResponseWriter, msg string, err error, log logger.Log) {
 	w.Header().Set("Content-Type", variable.DEFAULT_CONTENT_HEADER)
 
 	if err == errors.NoContentError {
 		// 204 should not return body(RFC) 
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusNoContent, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusNoContent), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, "", http.StatusNoContent)
 		return
 	}
 	if err == errors.BadRequestError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusBadRequest, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusBadRequest), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 	if err == errors.ForbiddenError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusForbidden, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusForbidden), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusForbidden)
 		return
 	}
 	if err == errors.BadGatewayError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusBadGateway, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusBadGateway), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusBadGateway)
 		return
 	}
 	if err == errors.ConflictError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusConflict, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusConflict), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusConflict)
 		return
 	}
 	if err == errors.UnauthorizedError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusUnauthorized, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusUnauthorized), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusUnauthorized)
 		return
 	}
 	if err == errors.NotAcceptableError {
-		log.Info("Return Error: (%d) %s to client: %s", http.StatusNotAcceptable, msg, r.RemoteAddr)
+		log.Info("Return error to client", logger.Int("status", http.StatusNotAcceptable), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 		http.Error(w, msg, http.StatusNotAcceptable)
 		return
 	}
 
-	log.Info("Return Error: (%d) %s to client: %s", http.StatusInternalServerError, msg, r.RemoteAddr)
+	log.Info("Return error to client", logger.Int("status", http.StatusInternalServerError), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 	http.Error(w, msg, http.StatusInternalServerError)
 }
 
 // ReturnResponse returns http response
-func ReturnResponse(r *http.Request, w http.ResponseWriter, msg string, log log.Log) {
+func ReturnResponse(r *http.Request, w http.ResponseWriter, msg string, log logger.Log) {
 	if msg != "" {
-		log.Info("Return Ok: (200) %s to client: %s", msg, r.RemoteAddr)
+		log.Info("Return ok: (200) to client", logger.Int("status", 200), logger.String("message", msg), logger.String("remote", r.RemoteAddr))
 	} else {
-		log.Info("Return Ok: (200) to client: %s", r.RemoteAddr)
+		log.Info("Return ok: (200) to client", logger.Int("status", 200), logger.String("remote", r.RemoteAddr))
 	}
-
 
 	if msg == "" {
 		w.WriteHeader(http.StatusOK)
